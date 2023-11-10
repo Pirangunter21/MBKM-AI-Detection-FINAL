@@ -14,14 +14,24 @@ import joblib
 from sklearn.decomposition import PCA
 from skimage.feature import graycomatrix, graycoprops
 import random
+import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import pygame
 
-
+pygame.init()
+infos = pygame.display.Info()
+width_display = (infos.current_w,infos.current_h)
 BORDER_COLOR = '#2c78c9'
 DARK_HEADER_COLOR = '#010101'
 img_HEIGHT = 650
-img_WIDTH = 850
-image_SIZE = (img_WIDTH, img_HEIGHT)
+img_WIDTH = 700
 
+Nimg_HEIGHT = infos.current_h
+Nimg_WIDTH = 800
+
+image_SIZE = (700, 500)
+Display_image_SIZE = (700, 500)
+#image_SIZE = width_display
 ################  Icon  ########################
 with open("logo.png", "rb") as img_file:
     iconb64 = base64.b64encode(img_file.read())
@@ -45,21 +55,73 @@ def get_image64(filename):
     buffer = io.BytesIO()
     imgdata = base64.b64decode(image_data)
     img = Image.open(io.BytesIO(imgdata))
-    new_img = img.resize(image_SIZE)  # x, y
+    new_img = img.resize(Display_image_SIZE)  # x, y
     new_img.save(buffer, format="PNG")
     img_b64 = base64.b64encode(buffer.getvalue())
     return img_b64
 
 img_b64 = get_image64("Offline.jpg")
 image_display = [
-    [sg.Image(data=img_b64, pad=(0, 0), key='image')]
+        [sg.T('Realtime Camera',
+              font=('Helvetica', 15, "bold"),
+              justification='center',
+              text_color='#000000')],
+        [sg.Image(data=img_b64, pad=(0, 0), key='image', size=Display_image_SIZE)] 
     ]
+Image_Processed = [
+         [sg.T('Image Processed',
+              font=('Helvetica', 15, "bold"),
+              justification='center',
+              text_color='#000000')],
+        [sg.Image(data=img_b64, pad=(0, 0), key='PImage',size=Display_image_SIZE)]
+    ]
+
+
+
 
 ################################################
 
+############# Matplotlib on PYSIMPLEGUI #####################
+matplotlib.use('TkAgg')
+fig = matplotlib.figure.Figure(figsize=(5, 4), dpi=100)
+t = np.arange(0, 3, .01)
+fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
 
+def draw_figure(canvas, figure):
+   figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+   figure_canvas_agg.draw()
+   figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+   return figure_canvas_agg
+################################################
+############# IP Host Name #####################
+
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
+
+################################################
+#cnt_setting = [set_file_saving,
+#               get_host_tcp_ip,
+#               set_tcp_ip,
+#               set_device_id,
+#               set_Decision
+#               ]
+               
+################################################
+top_layout = [[sg.Column(image_display, vertical_alignment='center'), sg.Column(Image_Processed, vertical_alignment='center')]]
+#content_layout = [
+#        sg.Column(image_display,
+#              size=Display_image_SIZE,
+#              pad=((0, 0), (0, 0))
+#              ),
+#    sg.Column(cnt_setting,
+#              size=image_SIZE,
+#              pad=((0, 0), (0, 0)),
+#              background_color=BORDER_COLOR)
+#              ]
+
+content_layout = [[
 ############# Save image options ###############
-set_file_saving = [sg.Column(
+sg.Column(
     [
         [sg.T('D I S P L A Y  I M A G E',
               font=('Helvetica', 15, "bold"),
@@ -78,15 +140,11 @@ set_file_saving = [sg.Column(
                   disabled=True,
                   use_readonly_for_disable=False,), sg.FolderBrowse()],
         [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))]
-    ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
-)]
-
-################################################
-
-############# TCP/IP Settings ##################
-
-
-set_tcp_ip = [sg.Column(
+    ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR,
+),
+###############################################
+############# TCP/IP Settings #################
+sg.Column(
     [
         [sg.T('T C P / I P   C O N F I G', font=('Helvetica',
               15, "bold"),text_color='#000000', background_color=BORDER_COLOR)],
@@ -99,40 +157,14 @@ set_tcp_ip = [sg.Column(
          sg.Input(sg.user_settings_get_entry('-PortSetting-', ''), disabled = True,
                   key='-PortSetting-', size=(10, 1)),
          sg.B('update', key='updateIpTcpServer')
-         ]
-    ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
-)]
-
-set_device_id = [sg.Column(
-    [
+        ],
         [sg.T('Device ID', font=('Helvetica', 16), background_color=BORDER_COLOR)],
         [sg.Input(sg.user_settings_get_entry('-deviceName-', ''), key='-deviceName-', size=(30, 1)),
          sg.B('update', key='updateDevice')]
     ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
-)]
-
-################################################
-##################    Decision   ###############
-set_Decision = [sg.Column(
-    [
-        [sg.T('Decision',
-              size=(13, 1),
-              font=('Helvetica', 15, "bold"),
-              background_color=BORDER_COLOR,
-              key='-decisionlabel-',
-                text_color='#000000',
-              justification='left')],
-        [sg.Button('ANALYZE', button_color=('#000000', '#d8ff34'),size=(13, 1))],
-       [sg.Multiline(size=(50,10), font='Tahoma 13', k='-Output-',disabled=True, autoscroll=True)]
-    ], background_color=BORDER_COLOR
-)]
-################################################
-############# IP Host Name ##################
-
-hostname = socket.gethostname()
-ip_address = socket.gethostbyname(hostname)
-
-get_host_tcp_ip = [sg.Column(
+),
+############# IP Host Name #####################
+sg.Column(
     [
         [sg.T('H O S T   I N F O', font=('Helvetica',
               15, "bold"),text_color='#000000', background_color=BORDER_COLOR)],
@@ -145,27 +177,54 @@ get_host_tcp_ip = [sg.Column(
         [sg.T(ip_address,text_color='#000000', font=('Helvetica', 12, "bold"),
               background_color=BORDER_COLOR)],  
     ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
-)]
+),
+#################################################
+##################    Decision   ################
+sg.Column(
+    [
+        [sg.T('Decision',
+              size=(13, 1),
+              font=('Helvetica', 15, "bold"),
+              background_color=BORDER_COLOR,
+              key='-decisionlabel-',
+                text_color='#000000',
+              justification='left')],
+        [sg.Button('ANALYZE', button_color=('#000000', '#d8ff34'),size=(13, 1))],
+        [sg.T('Detected Object: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+         sg.Input(sg.user_settings_get_entry('-model3-', ''), disabled = True,pad=(70,0),
+                  key='-model3-', size=(10, 1)),
+        ],
+        [sg.T('Cat Pudar: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+         sg.Input(sg.user_settings_get_entry('-result_1-', ''), disabled = True,pad=(70,0),
+                  key='-result_1-', size=(10, 1)),
+        ],
+        [sg.T('Print Kurang: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+         sg.Input(sg.user_settings_get_entry('-result_2-', ''), disabled = True,pad=(70,0),
+                  key='-result_2-', size=(10, 1)),
+        ],
+        [sg.T('Over Printing: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+         sg.Input(sg.user_settings_get_entry('-result_3-', ''), disabled = True,pad=(70,0),
+                  key='-result_3-', size=(10, 1)),
+        ],
+        [sg.T('Time (S): ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+         sg.Input(sg.user_settings_get_entry('waktu', ''), disabled = True,pad=(70,0),
+                  key='waktu', size=(10, 1)),
+        sg.T('Seconds ', font=('Helvetica', 12), background_color=BORDER_COLOR),
+        ],
+        [
+            sg.Button('', key='kesimpulan',disabled=False, button_color=('#00aa01'),size=(50, 2)),
+        ]
+    ], background_color=BORDER_COLOR
+),
+]
+]
 
-################################################
-cnt_setting = [set_file_saving,
-               get_host_tcp_ip,
-               set_tcp_ip,
-               set_device_id,
-               set_Decision
-               ]
+###############################################
 
-content_layout = [
-       sg.Column(cnt_setting,
-              size=(500, 800),
-              pad=((0, 0), (0, 0)),
-              background_color=BORDER_COLOR),
-    sg.Column(image_display,
-              size=image_SIZE,
-              pad=((0, 0), (0, 0))
-              )]
+bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,500))]
 
-layout = [content_layout]
+layout = [[top_layout, bottom_layout]]
+
 
 
 
@@ -175,10 +234,9 @@ window = sg.Window('DVI - Decal Visual Inspection',
                    no_titlebar=False,
                    margins=(0, 0),
                    grab_anywhere=True,
-                    background_color='#e8ebf3',
+                    background_color='#2a2a2a',
+                    element_justification='c',
                    icon=icon, location=(0, 0))
-
-element_justification='c'
 
 ################################################
 
@@ -306,11 +364,16 @@ def model_3(image_asli):
 
         plt.figure(figsize=(8, 8))
         plt.imshow(cv2.cvtColor(image_with_boxes, cv2.COLOR_BGR2RGB))
-        plt.title('Vision System Detection')
+#       plt.title('Vision System Detection')
         plt.axis('off')
-        plt.show()
+        now = datetime.now()
+        filename = now.strftime("AnalyzedObject_%Y%m%d%H%M%S%f") + ".png"
+        plt.savefig('Analyzed Files/'+ filename)
+        analyzed_img = get_image64('Analyzed Files/'+ filename)
+#        plt.show()
+        window['PImage'].update(data=analyzed_img)
     else:
-        window['-Output-'].print("\n No objects were found in the image. \n")
+        get_popup_auto("\n No objects were found in the image. \n")
 
     return num_objects
 
@@ -328,23 +391,19 @@ def cek_botol(image_path):
 
     if result_1 == 'Yes' or result_2 == 'Yes' or result_3 == 'Yes':
         kesimpulan = "Botol Rejected"
+        window['kesimpulan'].update(button_color='#ff0000')
     else:
         kesimpulan = "Botol Good"
+        window['kesimpulan'].update(button_color='#00aa01')
 
     waktu = time.time() - start_time
 
-    window['-Output-'].print("    Philip Bottle Vision System     ")
-    window['-Output-'].print("------------------------------------")
-    window['-Output-'].print("")
-    window['-Output-'].print("Objek Terdeteksi : ", model3)
-    window['-Output-'].print("")
-    window['-Output-'].print("Cat Pudar     : ", result_1)
-    window['-Output-'].print("Print Kurang  : ", result_2)
-    window['-Output-'].print("Over Printing : ", result_3)
-    window['-Output-'].print("")
-    window['-Output-'].print("------------------------------------")
-    window['-Output-'].print("Kesimpulan : ", kesimpulan)
-    window['-Output-'].print("Deteksi Selesai Dalam", "{:.2f}".format(waktu), "detik")
+    window['-model3-'].update(model3)
+    window['-result_1-'].update(result_1)
+    window['-result_2-'].update(result_2)
+    window['-result_3-'].update(result_3)
+    window['kesimpulan'].update(kesimpulan)
+    window['waktu'].update(waktu)
 
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/reject/REJECT_AVENT20230728113951796247.jpg"
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112550235490.jpg"
