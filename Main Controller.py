@@ -57,10 +57,35 @@ def get_image64(filename):
     return img_b64
 
 imageSample = get_image64("Offline.jpg")
-imageChange = get_image64("images1.png") 
+#imageChange = get_image64("images.png") 
 
 img_b64 = imageSample 
   
+def createSetting():
+   compItem = sg.Column([
+          [ sg.Text('In Robot (P35)', font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('0' , font='Any 22', key='inRobot', background_color=DARK_HEADER_COLOR)
+          ],
+          [ sg.Text('Out Confirm (P36)', font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('0' , font='Any 22', key='outConfirm', background_color=DARK_HEADER_COLOR)
+          ],
+          [ sg.Text('Out Pass(P37)' , font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('0' , font='Any 22', key='outPass', background_color=DARK_HEADER_COLOR)
+          ],
+          [ sg.Text('Out Fail (P40)', font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('0' , font='Any 22', key='outFail', background_color=DARK_HEADER_COLOR)
+          ],
+#          [ sg.Text('Column2', background_color='green', size=(10,2)),
+#            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
+#          ]
+          ],
+          size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((10, 0), (10, 0)))
+   return compItem
+
 
 def createComponet(deviceID,devicePosition,EnableCam,Image): 
 
@@ -71,16 +96,13 @@ def createComponet(deviceID,devicePosition,EnableCam,Image):
 #         sg.B('Update', key=updDev1, font= fontText,button_color='#2e2e2e'), 
           sg.CB("Enable Static Camera", font=fontText, enable_events=True, key=EnableCam, background_color=DARK_HEADER_COLOR, default=False)
         ], [sg.T('Result', font= fontResult, background_color=DARK_HEADER_COLOR, size=sizeResult, justification='c', pad = (0,0))],
-        [sg.Image(data=imageChange, pad=(0, 0), key=Image, size=(itemWidth, itemHeight))]
+        [sg.Image(data=imageSample, pad=(0, 0), key=Image, size=(itemWidth, itemHeight))]
       ],size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((2, 0), (2, 0)))
     
     if deviceID == "config":
-        compItem = sg.Column([[sg.Text('Capture Screen', background_color='green', size=(50,20), justification='c'),
-                               sg.Button('capture', button_color=('white', 'firebrick3'))                               
-                            ]],
-                size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((10, 0), (10, 0)))
+        compItem = createSetting()
+  
     return compItem
-
 
 #contTop = [frontItem, leftItem, rightItem]
 deviceList = ('1', '2', '3')
@@ -89,10 +111,10 @@ ImageCamera = ('Image01','Image02','Image03')
 CamEnable = ('Cam01', 'Cam02', 'Cam03')
 contTop = [createComponet(deviceName,deviceLocation,CamEnable,ImageCamera) for deviceName,deviceLocation,CamEnable,ImageCamera in zip(deviceList,deviceLocation,CamEnable,ImageCamera)]
 
-deviceList1 = ('4', '5')
-deviceLocation1 = ('B O T T O M  C H E C K I NG', 'R I G H T  C H E C K I N G')
-CamEnable1 = ('Cam04', 'Cam05')
-ImageCamera1 = ('Image04','Image05')
+deviceList1 = ('4', '5', 'config')
+deviceLocation1 = ('B O T T O M  C H E C K I NG', 'R I G H T  C H E C K I N G', '')
+CamEnable1 = ('Cam04', 'Cam05', '')
+ImageCamera1 = ('Image04','Image05', '')
 contButtom = [createComponet(deviceName,deviceLocation,CamEnable,ImageCamera) for deviceName,deviceLocation,CamEnable,ImageCamera in zip(deviceList1,deviceLocation1,CamEnable1,ImageCamera1)]
 
 layout = [contTop, contButtom]
@@ -100,7 +122,7 @@ layout = [contTop, contButtom]
 window = sg.Window('Quality Checker Monitor',
                 layout, finalize=True,
                 resizable=True,
-                no_titlebar=True, #SHOW TITLE BAR
+                no_titlebar=False, #SHOW TITLE BAR
                 margins=(0, 0),
                 grab_anywhere=True,
                 icon=icon,
@@ -139,7 +161,7 @@ def DeactivateCamera(ScreenName):
 
 # Create a TCP/IP socket
 ServerSocket = socket.socket()
-host = '0.0.0.0'
+host = '192.168.1.104'
 port = 5000
 try:
     ServerSocket.bind((host, port))
@@ -160,7 +182,7 @@ def recvall(sock):
             break
     return data
 
-def on_new_client(client_socket, addr):
+"""def on_new_client(client_socket, addr):
   thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
   thread.start()  #
 
@@ -178,13 +200,13 @@ def on_new_client(client_socket, addr):
   imgbytesSend = cv2.imencode('.png', cv2.resize(img, (650,400)))[1].tobytes()  # ditto
   dataImage = base64.b64encode(imgbytesSend).decode('ascii')
 
-  window[ScreenName + deviceID].update(data=dataImage)
+  #window[ScreenName + deviceID].update(data=dataImage)
   time.sleep(0.05)   
 
     
     
   client_socket.close()
-  thread.join()
+  thread.join()"""
 
 def sendData(client_socket, addr):  
   checkData = 0
@@ -205,9 +227,10 @@ def sendData(client_socket, addr):
 def s_changes():
   while True:
     Client, address = ServerSocket.accept()
+#    get_popup("Someone has connected to Main Controller")
     print('Connected to: ' + address[0] + ':' + str(address[1]))
-    thread = threading.Thread(target=on_new_client, args=(Client, address))  # create the thread
-    thread.start()  # start the thread
+#    thread = threading.Thread(target=on_new_client, args=(Client, address))  # create the thread
+#    thread.start()  # start the thread
 
 thread = threading.Thread(target=s_changes)
 thread.daemon = True

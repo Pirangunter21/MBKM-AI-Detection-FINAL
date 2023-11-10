@@ -154,7 +154,7 @@ sg.Column(
               background_color=BORDER_COLOR)],
         [sg.Input(sg.user_settings_get_entry('-IPSetting-', ''), key='-IPSetting-', size=(15, 1)),
          sg.T(':', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-PortSetting-', ''), disabled = True,
+         sg.Input(sg.user_settings_get_entry('-PortSetting-', ''), disabled = False,
                   key='-PortSetting-', size=(10, 1)),
          sg.B('update', key='updateIpTcpServer')
         ],
@@ -507,6 +507,7 @@ while True:
                     # connect to the server
                     get_popup_auto("Connecting device...")
                     client_socket.connect((host,port))
+                    get_popup("Connection is sucessful")
                 except:
                     # Terjadi kesalahan, keluar dari loop
                      get_popup("Error 53 : Device can not connect to server!")
