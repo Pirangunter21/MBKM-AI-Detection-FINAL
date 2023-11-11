@@ -18,6 +18,10 @@ import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pygame
 
+import socket
+import threading
+
+
 pygame.init()
 infos = pygame.display.Info()
 width_display = (infos.current_w,infos.current_h)
@@ -164,20 +168,7 @@ sg.Column(
     ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
 ),
 ############# IP Host Name #####################
-sg.Column(
-    [
-        [sg.T('H O S T   I N F O', font=('Helvetica',
-              15, "bold"),text_color='#000000', background_color=BORDER_COLOR)],
-        [sg.T("Hostname: ", font=('Helvetica', 12),
-              background_color=BORDER_COLOR)],
-        [sg.T(hostname,text_color='#000000', font=('Helvetica', 12, "bold"),
-              background_color=BORDER_COLOR)],       
-        [sg.T("IP Address: ", font=('Helvetica', 12),
-              background_color=BORDER_COLOR)],
-        [sg.T(ip_address,text_color='#000000', font=('Helvetica', 12, "bold"),
-              background_color=BORDER_COLOR)],  
-    ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR
-),
+
 #################################################
 ##################    Decision   ################
 sg.Column(
@@ -429,21 +420,55 @@ else:
     
 client_socket = socket.socket()  # instantiate
 
+def receive_response(client_socket, directory, imageSaving):
+    global TCPEnable
+    startup = 0
+    
+    while True:
+      if startup < 5:
+        save_image(client_socket, directory, False)
+        time.sleep(1)
+        startup += 1
+      else:
+        startup = 5
+        if TCPEnable:
+          window['-isTCPActive-'].update('Connect')
+          try:
+            # Menerima respons dari server
+            response = client_socket.recv(1024)
+            if response:
+                print('Menerima respons: {}'.format(response.decode()))
+                dataJson = json.loads(response.decode())
+
+                if "request" in dataJson:
+                    checking_request = dataJson["request"]
+                    if checking_request == "checking":
+                        save_image(client_socket, directory, imageSaving)
+          except:    
+            break
+        else:   
+          break 
+
+
 def save_image(client_socket, directory, imageSaving):
+    global deviceName
     if values['-isRealtime-'] == True:
             ret, frame = cap.read()
             frameShow = cv2.resize(frame, image_SIZE)
             if imageSaving:
                 now = datetime.now()
-                filename = now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
+                filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
                 new_file_name = os.path.join(directory, filename)
                 cv2.imwrite(new_file_name, frameShow)
                 get_popup_auto("Image Saved")
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
-            dataResponse = {
-            "response": "complete",
-            "data": {
+    else:
+        get_popup_auto("Camera is inactive! \nmake sure camera is enabled!")
+
+    dataResponse = {
+        "response": "complete",
+        "data": {
             "deviceID": id,
             "deviceName": deviceName,
             "result": 0,
@@ -451,12 +476,11 @@ def save_image(client_socket, directory, imageSaving):
             "imageRaw": dataImage
         }
     }
-    else:
-        get_popup_auto("Camera is inactive! \nmake sure camera is enabled!")
+
     TCPdataResponse = json.dumps(dataResponse)
     client_socket.sendall(TCPdataResponse.encode())
 
-
+deviceName = sg.user_settings_get_entry('-deviceName-', '')
 def capture_image():
     ret, frame = cap.read()
     frame = cv2.resize(frame, image_SIZE)
@@ -469,11 +493,14 @@ def DeactivateCamera():
     imageSample = get_image64("Offline.jpg")
     window['image'].update(data=imageSample)
 
+##################### NETWORK RELATED ##################
 camera_realtime = 0
+
+isSaving = sg.user_settings_get_entry('-IPSetting-', '')
 directory = sg.user_settings_get_entry('-locImage-', '')
 id = 1
 
-
+########################################################
 
 while True:
     event, values = window.read(timeout=20)
@@ -508,6 +535,10 @@ while True:
                     get_popup_auto("Connecting device...")
                     client_socket.connect((host,port))
                     get_popup("Connection is sucessful")
+                    response_thread = threading.Thread(
+                    target=receive_response, args=(client_socket, directory, isSaving))
+                    response_thread.daemon = True
+                    response_thread.start()
                 except:
                     # Terjadi kesalahan, keluar dari loop
                      get_popup("Error 53 : Device can not connect to server!")
@@ -523,6 +554,7 @@ while True:
     elif event == 'updateDevice':
         sg.user_settings_set_entry('-deviceName-', values['-deviceName-'])
         deviceName = values['-deviceName-']
+        id = deviceName
 
     elif event == '-isRealtime-':
         camera_realtime = values['-isRealtime-']

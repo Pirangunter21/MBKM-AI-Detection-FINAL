@@ -91,12 +91,12 @@ def createComponet(deviceID,devicePosition,EnableCam,Image):
 
     compItem = sg.Column([
        [sg.T(devicePosition, font= fontTitle, background_color=BORDER_COLOR, size=sizeTitle, justification='c', pad = (0,0))], 
-        [sg.T('Camera '+ deviceID, font= fontText, background_color=DARK_HEADER_COLOR),
+        [sg.T('Device Name: '+ deviceID, font= fontText, background_color=DARK_HEADER_COLOR),
 #        sg.Input(sg.user_settings_get_entry('-dev1-', ''), key='-dev1-', size=(15, 1), font= fontText),
 #         sg.B('Update', key=updDev1, font= fontText,button_color='#2e2e2e'), 
-          sg.CB("Enable Static Camera", font=fontText, enable_events=True, key=EnableCam, background_color=DARK_HEADER_COLOR, default=False)
+#          sg.CB("Enable Static Camera", font=fontText, enable_events=True, key=EnableCam, background_color=DARK_HEADER_COLOR, default=False)
         ], [sg.T('Result', font= fontResult, background_color=DARK_HEADER_COLOR, size=sizeResult, justification='c', pad = (0,0))],
-        [sg.Image(data=imageSample, pad=(0, 0), key=Image, size=(itemWidth, itemHeight))]
+        [sg.Image(data=imageSample, pad=(0, 0), key='image' + deviceID, size=(itemWidth, itemHeight))]
       ],size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((2, 0), (2, 0)))
     
     if deviceID == "config":
@@ -160,27 +160,92 @@ def DeactivateCamera(ScreenName):
 
 
 # Create a TCP/IP socket
-ServerSocket = socket.socket()
-host = '192.168.1.104'
+
+ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+host = '10.29.202.217'
 port = 5000
-try:
-    ServerSocket.bind((host, port))
-except socket.error as e:
-    print(str(e))
+server_address = ('10.29.202.217', 5000)
+ServerSocket.bind(server_address)
+
+# Listen for incoming connections
 ServerSocket.listen()
 
 captureRequest = 0
 
-def recvall(sock):
-    BUFF_SIZE = 4096 # 4 KiB
-    data = b''
+def on_new_client(client_socket, addr):
+  
+  status = "ok"
+  try:
+    thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
+    thread.start()  #
+    dataAll = ""
+    status = "ok"
+    number = 0
+    BUFF_SIZE = 1024
     while True:
-        part = sock.recv(BUFF_SIZE)
-        data += part
-        if len(part) < BUFF_SIZE:
-            # either 0 or end of data
-            break
-    return data
+      data = client_socket.recv(BUFF_SIZE).decode('utf-8')
+      if not data:
+        break        
+      
+      dataAll += data
+      number += 1
+      try:
+        dataJson = json.loads(dataAll)
+        deviceID = str(dataJson["data"]["deviceID"])
+        my_bytes = dataJson["data"]["imageRaw"]
+        imgbytes = base64.b64decode(my_bytes)
+        
+        #change image size
+        base64Data = base64.b64encode(imgbytes)
+        decoded_data = base64.b64decode(base64Data)
+        np_data = np.fromstring(decoded_data,np.uint8)
+        img = cv2.imdecode(np_data,cv2.IMREAD_UNCHANGED)
+        imgbytesSend = cv2.imencode('.png', cv2.resize(img, (650,400)))[1].tobytes()  # ditto
+        dataImage = base64.b64encode(imgbytesSend).decode('ascii')
+
+        window['image' + deviceID].update(data=dataImage)
+        #print(f"{addr} >> {dataAll}")
+        print(f"{addr} >> {number}")
+        dataAll = ""
+        number = 0
+      except:         
+        status = "reading"
+        
+      time.sleep(0.0001)  
+
+    client_socket.close()
+    thread.join()
+  except:      
+    status = "fail read data"
+    print(status)
+
+def sendData(client_socket, addr):  
+  checkData = 0
+  print(addr[0])
+  while True:
+    time.sleep(0.05)
+    if checkData != captureRequest:
+      try:
+        checkData = captureRequest
+        datajson = {"request" : "checking"}
+        sendJson = json.dumps(datajson)
+        client_socket.sendall(sendJson.encode())
+        print("changeData")
+      except:
+         print(f"disconnect {addr} ")
+         break
+
+def s_changes():
+  while True:
+    Client, address = ServerSocket.accept()
+    print('Connected to: ' + address[0] + ':' + str(address[1]))
+    thread = threading.Thread(target=on_new_client, args=(Client, address))  # create the thread
+    thread.start()  # start the thread` 1 `
+
+
+thread = threading.Thread(target=s_changes)
+thread.daemon = True
+thread.start()
 
 """def on_new_client(client_socket, addr):
   thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
@@ -208,42 +273,22 @@ def recvall(sock):
   client_socket.close()
   thread.join()"""
 
-def sendData(client_socket, addr):  
-  checkData = 0
-  print(addr[0])
-  while True:
-    time.sleep(0.05)
-    if checkData != captureRequest:
-      try:
-        checkData = captureRequest
-        datajson = {"request" : "checking"}
-        sendJson = json.dumps(datajson)
-        client_socket.sendall(sendJson.encode())
-        print("changeData")
-      except:
-         print("disconnect")
-         break
-
-def s_changes():
-  while True:
-    Client, address = ServerSocket.accept()
-#    get_popup("Someone has connected to Main Controller")
-    print('Connected to: ' + address[0] + ':' + str(address[1]))
-#    thread = threading.Thread(target=on_new_client, args=(Client, address))  # create the thread
-#    thread.start()  # start the thread
-
-thread = threading.Thread(target=s_changes)
-thread.daemon = True
-thread.start()
-
-
 running01,running02,running03,running04,running05 = False,False,False,False,False
 
 while True:
 #  event, values = window.read(timeout=50)
+
+#  window['capture'].update(captureRequest)
+
   event, values = window.read()
   if event in (sg.WINDOW_CLOSED, 'Exit'):
     break
+#  elif event == 'capture':
+#    captureRequest = captureRequest + 1
+#    if captureRequest > 10:
+#      captureRequest = 0
+#    print(captureRequest)
+
   if values['Cam01'] == True:
     running01 = True
     get_popup("Running Camera 1")
