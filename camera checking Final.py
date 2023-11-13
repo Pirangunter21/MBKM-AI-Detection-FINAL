@@ -212,7 +212,7 @@ sg.Column(
 
 ###############################################
 
-bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,500))]
+bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,300))]
 
 layout = [[top_layout, bottom_layout]]
 
@@ -515,8 +515,8 @@ while True:
         TCPEnable = False
 
     if event == 'ANALYZE':
-        #cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
-        cek_botol(r"Code Philip MF/file_image/test.jpg")
+        cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
+        #cek_botol(r"Code Philip MF/file_image/test.jpg")
     elif event == 'updateIpTcpServer':
         sg.user_settings_set_entry('-IPSetting-', values['-IPSetting-'])
         sg.user_settings_set_entry('-PortSetting-', values['-PortSetting-'])
