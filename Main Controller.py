@@ -160,11 +160,12 @@ def DeactivateCamera(ScreenName):
 # Create a TCP/IP socket
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '192.168.1.107'
+hostname = socket.gethostname()
+host = socket.gethostbyname(hostname)
 port = 5000
-server_address = ('192.168.1.107', 5000)
+server_address = (host, 5000)
 ServerSocket.bind(server_address)
-
+get_ERROR_popup('This device IP Address is: ' + host + '\nThis device port is: 5000')
 # Listen for incoming connections
 ServerSocket.listen()
 
