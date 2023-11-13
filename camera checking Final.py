@@ -37,7 +37,7 @@ image_SIZE = (700, 500)
 Display_image_SIZE = (700, 500)
 #image_SIZE = width_display
 ################  Icon  ########################
-with open("logo.png", "rb") as img_file:
+with open("Logo.png", "rb") as img_file:
     iconb64 = base64.b64encode(img_file.read())
 icon = iconb64
 ################################################
@@ -212,7 +212,7 @@ sg.Column(
 
 ###############################################
 
-bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,300))]
+bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,500))]
 
 layout = [[top_layout, bottom_layout]]
 

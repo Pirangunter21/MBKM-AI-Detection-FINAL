@@ -1,11 +1,10 @@
 import PySimpleGUI as sg
 import PySimpleGUI as psg
 import pygame
-from PIL import ImageTk
+from PIL import Image
 import tkinter as tk
 import time
 import base64
-from PIL import Image
 import io
 import socket
 import threading
@@ -161,9 +160,9 @@ def DeactivateCamera(ScreenName):
 # Create a TCP/IP socket
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '10.29.202.217'
+host = '192.168.1.107'
 port = 5000
-server_address = ('10.29.202.217', 5000)
+server_address = ('192.168.1.107', 5000)
 ServerSocket.bind(server_address)
 
 # Listen for incoming connections
