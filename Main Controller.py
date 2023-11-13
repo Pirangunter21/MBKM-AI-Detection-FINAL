@@ -14,7 +14,6 @@ import numpy as np
 import ctypes
 import cv2
 
-ctypes.windll.user32.SetProcessDPIAware()
 pygame.init()
 infos = pygame.display.Info()
 
