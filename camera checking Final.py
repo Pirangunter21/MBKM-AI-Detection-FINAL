@@ -37,7 +37,7 @@ image_SIZE = (700, 500)
 Display_image_SIZE = (700, 500)
 #image_SIZE = width_display
 ################  Icon  ########################
-with open("logo.png", "rb") as img_file:
+with open("Logo.png", "rb") as img_file:
     iconb64 = base64.b64encode(img_file.read())
 icon = iconb64
 ################################################
@@ -515,8 +515,8 @@ while True:
         TCPEnable = False
 
     if event == 'ANALYZE':
-        #cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
-        cek_botol(r"Code Philip MF/file_image/test.jpg")
+        cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
+        #cek_botol(r"Code Philip MF/file_image/test.jpg")
     elif event == 'updateIpTcpServer':
         sg.user_settings_set_entry('-IPSetting-', values['-IPSetting-'])
         sg.user_settings_set_entry('-PortSetting-', values['-PortSetting-'])
