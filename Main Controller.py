@@ -172,7 +172,7 @@ ServerSocket.listen()
 captureRequest = 0
 
 def on_new_client(client_socket, addr):
-  
+ 
   status = "ok"
   try:
     thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
@@ -246,47 +246,21 @@ thread = threading.Thread(target=s_changes)
 thread.daemon = True
 thread.start()
 
-"""def on_new_client(client_socket, addr):
-  thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
-  thread.start()  #
-
-  dataAll = recvall(client_socket)
-  dataJson = json.loads(dataAll)
-  deviceID = str(dataJson["data"]["deviceID"])
-  my_bytes = dataJson["data"]["imageRaw"]
-  imgbytes = base64.b64decode(my_bytes)
-  
-  #change image size
-  base64Data = base64.b64encode(imgbytes)
-  decoded_data = base64.b64decode(base64Data)
-  np_data = np.fromstring(decoded_data,np.uint8)
-  img = cv2.imdecode(np_data,cv2.IMREAD_UNCHANGED)
-  imgbytesSend = cv2.imencode('.png', cv2.resize(img, (650,400)))[1].tobytes()  # ditto
-  dataImage = base64.b64encode(imgbytesSend).decode('ascii')
-
-  #window[ScreenName + deviceID].update(data=dataImage)
-  time.sleep(0.05)   
-
-    
-    
-  client_socket.close()
-  thread.join()"""
-
 running01,running02,running03,running04,running05 = False,False,False,False,False
 
 while True:
-#  event, values = window.read(timeout=50)
+  event, values = window.read(timeout=50)
 
 #  window['capture'].update(captureRequest)
 
   event, values = window.read()
   if event in (sg.WINDOW_CLOSED, 'Exit'):
     break
-#  elif event == 'capture':
-#    captureRequest = captureRequest + 1
-#    if captureRequest > 10:
-#      captureRequest = 0
-#    print(captureRequest)
+  elif event == 'capture':
+    captureRequest = captureRequest + 1
+    if captureRequest > 10:
+      captureRequest = 0
+    print(captureRequest)
 
   if values['Cam01'] == True:
     running01 = True
