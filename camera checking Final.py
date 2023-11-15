@@ -34,6 +34,7 @@ Nimg_HEIGHT = infos.current_h
 Nimg_WIDTH = 800
 
 image_SIZE = (700, 500)
+img_size = (3840 , 2160)
 Display_image_SIZE = (700, 500)
 #image_SIZE = width_display
 ################  Icon  ########################
@@ -456,10 +457,11 @@ def save_image(client_socket, directory, imageSaving):
             ret, frame = cap.read()
             frameShow = cv2.resize(frame, image_SIZE)
             if imageSaving:
+                savedframe = cv2.resize(frame, img_size)
                 now = datetime.now()
                 filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
                 new_file_name = os.path.join(directory, filename)
-                cv2.imwrite(new_file_name, frameShow)
+                cv2.imwrite(new_file_name, savedframe)
                 get_popup_auto("Image Saved")
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
