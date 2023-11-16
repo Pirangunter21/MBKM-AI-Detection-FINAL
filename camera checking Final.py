@@ -144,7 +144,7 @@ sg.Column(
                   enable_events=True,
                   disabled=True,
                   use_readonly_for_disable=False,), sg.FolderBrowse()],
-        [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))],
+#        [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))],
         [sg.CB('enable saving',
                   font=('Helvetica', 12),
                   enable_events=True,
@@ -471,19 +471,18 @@ def save_image(client_socket, directory, imageSaving):
                 get_popup_auto("Image Saved")
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
-    dataResponse = {
-        "response": "complete",
-        "data": {
-            "deviceID": id,
-            "deviceName": deviceName,
-            "result": 0,
-            "resultDescription": "good",
-            "imageRaw": dataImage
-        }
-    }
-
-    TCPdataResponse = json.dumps(dataResponse)
-    client_socket.sendall(TCPdataResponse.encode())
+            dataResponse = {
+                "response": "complete",
+                "data": {
+                    "deviceID": id,
+                    "deviceName": deviceName,
+                    "result": 0,
+                    "resultDescription": "good",
+                    "imageRaw": dataImage
+                }
+            }
+            TCPdataResponse = json.dumps(dataResponse)
+            client_socket.sendall(TCPdataResponse.encode())
 
 deviceName = sg.user_settings_get_entry('-deviceName-', '')
 def capture_image():
