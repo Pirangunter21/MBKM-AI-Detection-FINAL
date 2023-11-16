@@ -144,7 +144,13 @@ sg.Column(
                   enable_events=True,
                   disabled=True,
                   use_readonly_for_disable=False,), sg.FolderBrowse()],
-        [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))]
+        [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))],
+        [sg.CB('enable saving',
+                  font=('Helvetica', 12),
+                  enable_events=True,
+                  k='-isSaveImage-',
+                  background_color=BORDER_COLOR,
+                  default=sg.user_settings_get_entry('-isSaveImage-', ''))]
     ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR,
 ),
 ###############################################
@@ -465,9 +471,6 @@ def save_image(client_socket, directory, imageSaving):
                 get_popup_auto("Image Saved")
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
-    else:
-        get_popup_auto("Camera is inactive! \nmake sure camera is enabled!")
-
     dataResponse = {
         "response": "complete",
         "data": {
@@ -515,6 +518,9 @@ while True:
         directory = sg.user_settings_get_entry('-locImage-', '')
         window['-isTCPActive-'].update(False)
         TCPEnable = False
+    elif event == '-isSaveImage-':
+        sg.user_settings_set_entry('-isSaveImage-', values['-isSaveImage-'])
+        isSaving = values['-isSaveImage-']
 
     if event == 'ANALYZE':
         cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
