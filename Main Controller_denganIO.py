@@ -79,15 +79,15 @@ def createSetting():
             sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
             sg.Text('0' , font='Any 22', key='outFail', background_color=DARK_HEADER_COLOR)
           ],
-#          [ sg.Text('Column2', background_color='green', size=(10,2)),
-#            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
-#          ]
+          [ sg.Text('Column2', background_color='green', size=(10,2)),
+            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
+          ],
           ],
           size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((10, 0), (10, 0)))
    return compItem
 
 
-def createComponet(deviceID,devicePosition,EnableCam,Image): 
+def createComponet(deviceID,devicePosition,Image): 
 
     compItem = sg.Column([
        [sg.T(devicePosition, font= fontTitle, background_color=BORDER_COLOR, size=sizeTitle, justification='c', pad = (0,0))], 
@@ -108,14 +108,13 @@ def createComponet(deviceID,devicePosition,EnableCam,Image):
 deviceList = ('1', '2', '3')
 deviceLocation = ('T O P  C H E C K I N G', 'L E F T C H E C K I N G', 'B A CK  C H E C K I N G')
 ImageCamera = ('Image01','Image02','Image03')
-CamEnable = ('Cam01', 'Cam02', 'Cam03')
-contTop = [createComponet(deviceName,deviceLocation,CamEnable,ImageCamera) for deviceName,deviceLocation,CamEnable,ImageCamera in zip(deviceList,deviceLocation,CamEnable,ImageCamera)]
+contTop = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList,deviceLocation,ImageCamera)]
 
 deviceList1 = ('4', '5', 'config')
 deviceLocation1 = ('B O T T O M  C H E C K I NG', 'R I G H T  C H E C K I N G', '')
 CamEnable1 = ('Cam04', 'Cam05', '')
 ImageCamera1 = ('Image04','Image05', '')
-contButtom = [createComponet(deviceName,deviceLocation,CamEnable,ImageCamera) for deviceName,deviceLocation,CamEnable,ImageCamera in zip(deviceList1,deviceLocation1,CamEnable1,ImageCamera1)]
+contButtom = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList1,deviceLocation1,ImageCamera1)]
 
 layout = [contTop, contButtom]
 
@@ -163,11 +162,11 @@ def DeactivateCamera(ScreenName):
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
-host = socket.gethostbyname(hostname)
+host = '192.168.1.107'
 port = 5000
 server_address = (host, 5000)
 ServerSocket.bind(server_address)
-get_ERROR_popup('This device IP Address is: ' + host + '\nThis device port is: 5000')
+#get_ERROR_popup('This device IP Address is: ' + host + '\nThis device port is: 5000')
 # Listen for incoming connections
 ServerSocket.listen()
 
@@ -178,7 +177,7 @@ def on_new_client(client_socket, addr):
   status = "ok"
   try:
     thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
-    thread.start()  #
+    thread.start()
     dataAll = ""
     status = "ok"
     number = 0
@@ -261,7 +260,7 @@ dataRobotInput = 0
 running01,running02,running03,running04,running05 = False,False,False,False,False
 
 def checkDataIO(prevDataInp, prevCaptureRequest):
-  #actINRobot = GPIO.input(pinInpRobot)
+  actINRobot = GPIO.input(pinInpRobot)
   window['inRobot'].update(str(actINRobot))
   if actINRobot != prevDataInp:
     if  dataRobotInput == 0:
@@ -290,9 +289,8 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
 while True:
   event, values = window.read(timeout=50)
   dataRobotInput , captureRequest = checkDataIO(dataRobotInput, captureRequest)
-#  window['capture'].update(captureRequest)
+  window['capture'].update(captureRequest)
 
-  event, values = window.read()
   if event in (sg.WINDOW_CLOSED, 'Exit'):
     break
   elif event == 'capture':
@@ -301,55 +299,7 @@ while True:
       captureRequest = 0
     print(captureRequest)
 
-  if values['Cam01'] == True:
-    running01 = True
-    get_popup("Running Camera 1")
-    GetCamera('Image01',0)
-  elif values['Cam01'] == False and running01:
-    running01 = False
-    get_popup("WARNING : Deactivating CAMERA 1")
-    DeactivateCamera('Image01')
 
-  if values['Cam02'] == True and not running02:
-    running02 = True
-    get_popup("Running Camera 2")
-    GetCamera('Image02',1)
-  elif values['Cam02'] == False and running02:
-    running02 = False
-    get_popup("WARNING : Deactivating CAMERA 2")
-    DeactivateCamera('Image02')
-
-  if values['Cam03'] == True and not running03:
-    running03 = True
-    print('test')
-    get_popup("Running Camera 3")
-    GetCamera('Image03',2)
-  elif values['Cam03'] == False and running03:
-    running03 = False
-    get_popup("WARNING : Deactivating CAMERA 3")
-    DeactivateCamera('Image03')
-
-  if values['Cam04'] == True and not running04:
-    running04 = True
-    get_popup("Running Camera 4")
-    GetCamera('Image04',3)
-  elif values['Cam04'] == False and running04:
-    running04 = False
-    get_popup("WARNING : Deactivating CAMERA 4")
-    DeactivateCamera('Image04')
-
-  if values['Cam05'] == True and not running05:
-    running05 = True
-    print('test')
-    get_popup("Running Camera 5")
-    GetCamera('Image05',4)
-  elif values['Cam05'] == False and running05:
-    running05 = False
-    get_popup("WARNING : Deactivating CAMERA 5")
-    DeactivateCamera('Image05')
-
-  elif event == 'capture':
-      captureRequest = captureRequest + 1
-      print(captureRequest)
-
+thread.join()   
+ServerSocket.close()
 window.close()
