@@ -33,8 +33,8 @@ sizeTitle = (int(itemWidth * 162 / width_display[0]) , 1)
 image_SIZE = (800, 600)
 
 
-fontTitle = ('Impact', 16)
-fontText = ('Arial', 12)
+fontTitle = ('Helvetica', 16)
+fontText = ('Helvetica', 12)
 
 sizeResult = (int(itemWidth * 500 / width_display[0]) , 1)
 fontResult = ('Helvetica', 20)
