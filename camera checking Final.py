@@ -34,7 +34,7 @@ Nimg_HEIGHT = infos.current_h
 Nimg_WIDTH = 800
 
 image_SIZE = (700, 500)
-img_size = (3840 , 2160)
+img_size = (3264 , 2448)
 Display_image_SIZE = (700, 500)
 #image_SIZE = width_display
 ################  Icon  ########################
@@ -376,6 +376,7 @@ def model_3(image_asli):
     return num_objects
 
 def cek_botol(image_path):
+    global kesimpulan
     start_time = time.time()
     result_image = process_image(image_path)
     result_1 = model_1(result_image)
@@ -410,9 +411,9 @@ image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT202
 
 
 ############## Camera Encoding #################
-cap = cv2.VideoCapture(0)
-cap.set(3, 800)
-cap.set(4, 800)
+cap = cv2.VideoCapture(1)
+cap.set(3, 1920)
+cap.set(4, 1080)
 cap.set(6, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
 
 ################################################
@@ -457,7 +458,7 @@ def receive_response(client_socket, directory, imageSaving):
           break 
 
 
-def save_image(client_socket, directory, imageSaving):
+def save_image(client_socket, directory, imageSaving, openimage):
     global deviceName
     if values['-isRealtime-'] == True:
             ret, frame = cap.read()
@@ -469,6 +470,12 @@ def save_image(client_socket, directory, imageSaving):
                 new_file_name = os.path.join(directory, filename)
                 cv2.imwrite(new_file_name, savedframe)
                 get_popup_auto("Image Saved")
+            if openimage:
+                #analyzed_img = get_image64(r"Analyzed Files/AnalyzedObject_20231111143730679400.png")
+                analyzed_img = r"Saved Images/"+ filename
+                #cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112550235490.jpg")
+                #cek_botol(r"Saved Images/test.png")
+                cek_botol(analyzed_img)
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
             dataResponse = {
@@ -477,7 +484,7 @@ def save_image(client_socket, directory, imageSaving):
                     "deviceID": id,
                     "deviceName": deviceName,
                     "result": 0,
-                    "resultDescription": "good",
+                    "resultDescription": kesimpulan,
                     "imageRaw": dataImage
                 }
             }
@@ -522,7 +529,7 @@ while True:
         isSaving = values['-isSaveImage-']
 
     if event == 'ANALYZE':
-        cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
+        save_image(client_socket, directory, True,True)
         #cek_botol(r"Code Philip MF/file_image/test.jpg")
     elif event == 'updateIpTcpServer':
         sg.user_settings_set_entry('-IPSetting-', values['-IPSetting-'])
