@@ -239,6 +239,9 @@ window = sg.Window('DVI - Decal Visual Inspection',
 ################################################
 
 ########### MACHINE LEARNING CORE ##############
+
+kesimpulan = ''
+
 def process_image(image_path):
     image = Image.open(image_path)
 
@@ -376,7 +379,6 @@ def model_3(image_asli):
     return num_objects
 
 def cek_botol(image_path):
-    global kesimpulan
     start_time = time.time()
     result_image = process_image(image_path)
     result_1 = model_1(result_image)
@@ -403,6 +405,7 @@ def cek_botol(image_path):
     window['-result_3-'].update(result_3)
     window['kesimpulan'].update(kesimpulan)
     window['waktu'].update(waktu)
+    return kesimpulan
 
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/reject/REJECT_AVENT20230728113951796247.jpg"
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112550235490.jpg"
@@ -411,7 +414,7 @@ image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT202
 
 
 ############## Camera Encoding #################
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cap.set(3, 1920)
 cap.set(4, 1080)
 cap.set(6, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
@@ -434,7 +437,7 @@ def receive_response(client_socket, directory, imageSaving):
     
     while True:
       if startup < 5:
-        save_image(client_socket, directory, False)
+        save_image(client_socket, directory, False, False)
         time.sleep(1)
         startup += 1
       else:
@@ -459,6 +462,7 @@ def receive_response(client_socket, directory, imageSaving):
 
 
 def save_image(client_socket, directory, imageSaving, openimage):
+    global kesimpulan
     global deviceName
     if values['-isRealtime-'] == True:
             ret, frame = cap.read()
