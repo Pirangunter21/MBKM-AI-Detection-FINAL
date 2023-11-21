@@ -147,7 +147,7 @@ def GetCamera(ScreenName,CameraPlacement):
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
-host = '192.168.1.107'
+host = '192.168.1.102'
 port = 5000
 server_address = (host, 5000)
 ServerSocket.bind(server_address)
@@ -157,8 +157,14 @@ ServerSocket.listen()
 
 captureRequest = 0
 
+
+IOPass = False
+IOFail = False
+hasil = "test"
+
 def on_new_client(client_socket, addr):
- 
+
+
   status = "ok"
   try:
     thread = threading.Thread(target=sendData, args=(client_socket, addr))  # create the thread
@@ -183,15 +189,19 @@ def on_new_client(client_socket, addr):
         
         #Check final results
         if results == "Botol Good":
-          GPIO.output(pinPass, GPIO.HIGH) 
-          Var_outPass += 1
-          time.sleep(0.1)
-          GPIO.output(pinPass, GPIO.LOW) 
+           analyzeIO(results)
+#          hasil = results
+#          IOPass = True
+#          time.sleep(0.1)
+#          print("kalo " + hasil)
+#          print(IOPass)
         if results == "Botol Rejected":
-            GPIO.output(pinFail, GPIO.HIGH) 
-            Var_outFail += 1
-            time.sleep(0.1)
-            GPIO.output(pinFail, GPIO.LOW) 
+           analyzeIO(results)
+#            hasil = results
+#            IOFail = True
+#            time.sleep(0.1)
+#            print("kalo " + hasil)
+#            print(IOFail)
         #change image size
         base64Data = base64.b64encode(imgbytes)
         decoded_data = base64.b64decode(base64Data)
@@ -254,16 +264,34 @@ GPIO.setup([pinConfirm, pinPass, pinFail], GPIO.OUT)
 
 dataRobotInput = 0
 
-running01,running02,running03,running04,running05 = False,False,False,False,False
+IOPass = False
+IOFail = False
+
+Var_outConfirm = 0
+Var_outFail = 0
+Var_outPass = 0 
+
+def analyzeIO(results):
+  global IOPass
+  global IOFail
+  if results == "Botol Rejected":
+    GPIO.output(pinFail, GPIO.HIGH)
+    IOFail = True
+    print(results)
+  if results == "Botol Good":
+    GPIO.output(pinPass, GPIO.HIGH)
+    IOPass = True
+    print(results)
+
 
 def checkDataIO(prevDataInp, prevCaptureRequest):
   global Var_outConfirm
-  global Var_outPass
   global Var_outFail
+  global Var_outPass
 
-  Var_outConfirm = 0
-  Var_outPass = 0
-  Var_outFail = 0
+  global IOPass
+  global IOFail
+
   actINRobot = GPIO.input(pinInpRobot)
   window['inRobot'].update(str(actINRobot))
   if actINRobot != prevDataInp:
@@ -272,10 +300,20 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       if prevCaptureRequest > 10:
         prevCaptureRequest = 0
       GPIO.output(pinConfirm, GPIO.HIGH)
-      GPIO.output(pinPass, GPIO.HIGH)
-      GPIO.output(pinFail, GPIO.LOW)
-
-      window['outConfirm'].update(Var_outConfirm + 1)
+      if pinConfirm:
+        Var_outConfirm +=1
+      if IOFail:
+        Var_outFail +=1
+        GPIO.output(pinFail, GPIO.HIGH)
+      if IOPass:
+        Var_outPass +=1
+        GPIO.output(pinPass, GPIO.HIGH)
+      print(IOFail)
+      print(Var_outConfirm)
+      print(Var_outFail)
+      print(Var_outPass)
+      print(IOPass)
+      window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
       time.sleep(0.1)
