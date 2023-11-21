@@ -1,5 +1,6 @@
 ## MCC-vision-System
 <pre>
+  Note: Connection can be only established BETWEEN Jetson/Linux Users only, connecting with other OS will cause the program to hang!
 Install Numpy, Pillow, CV, PySimpleGUI
 
 Python yang dipake VIRTUAL ENVIRONMENT 3.11
