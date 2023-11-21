@@ -234,14 +234,12 @@ window = sg.Window('DVI - Decal Visual Inspection',
                    grab_anywhere=True,
                     background_color='#2a2a2a',
                     element_justification='c',
-                   icon=icon, location=(0, 0),
-                right_click_menu=sg.MENU_RIGHT_CLICK_EXIT)
+                   icon=icon, location=(0, 0))
 
 ################################################
 
 ########### MACHINE LEARNING CORE ##############
 
-kesimpulan = ''
 
 def process_image(image_path):
     image = Image.open(image_path)
@@ -374,10 +372,12 @@ def model_3(image_asli):
         analyzed_img = get_image64('Analyzed Files/'+ filename)
 #        plt.show()
         window['PImage'].update(data=analyzed_img)
-    else:
-        get_popup_auto("\n No objects were found in the image. \n")
+    #else:
+        #get_popup_auto("\n No objects were found in the image. \n")
 
     return num_objects
+
+finalresults = "Botol Rejected"
 
 def cek_botol(image_path):
     start_time = time.time()
@@ -393,9 +393,11 @@ def cek_botol(image_path):
 
     if result_1 == 'Yes' or result_2 == 'Yes' or result_3 == 'Yes':
         kesimpulan = "Botol Rejected"
+        finalresults = kesimpulan
         window['kesimpulan'].update(button_color='#ff0000')
     else:
         kesimpulan = "Botol Good"
+        finalresults = kesimpulan
         window['kesimpulan'].update(button_color='#00aa01')
 
     waktu = time.time() - start_time
@@ -406,7 +408,8 @@ def cek_botol(image_path):
     window['-result_3-'].update(result_3)
     window['kesimpulan'].update(kesimpulan)
     window['waktu'].update(waktu)
-    return kesimpulan
+    return finalresults
+
 
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/reject/REJECT_AVENT20230728113951796247.jpg"
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112550235490.jpg"
@@ -424,6 +427,7 @@ cap.set(6, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
 
 
 TCPEnable = 0
+Var_outConfirm = False
 host = sg.user_settings_get_entry('-IPSetting-', '')
 if sg.user_settings_get_entry('-PortSetting-', '') == "":
     port = 5000
@@ -435,7 +439,9 @@ client_socket = socket.socket()  # instantiate
 def receive_response(client_socket, directory, imageSaving):
     global TCPEnable
     startup = 0
-    
+    checkData = 0
+    captureRequest = 0
+    InputOutput = client_socket.recv(1024).decode()
     while True:
       if startup < 5:
         save_image(client_socket, directory, False, False)
@@ -451,11 +457,12 @@ def receive_response(client_socket, directory, imageSaving):
             if response:
                 print('Menerima respons: {}'.format(response.decode()))
                 dataJson = json.loads(response.decode())
-
+#                if checkData != captureRequest:
+#                    save_image(client_socket, directory, True, True)
                 if "request" in dataJson:
                     checking_request = dataJson["request"]
                     if checking_request == "checking":
-                        save_image(client_socket, directory, imageSaving)
+                        save_image(client_socket, directory, True, True)
           except:    
             break
         else:   
@@ -463,7 +470,7 @@ def receive_response(client_socket, directory, imageSaving):
 
 
 def save_image(client_socket, directory, imageSaving, openimage):
-    global kesimpulan
+    global finalresults
     global deviceName
     if values['-isRealtime-'] == True:
             ret, frame = cap.read()
@@ -474,7 +481,7 @@ def save_image(client_socket, directory, imageSaving, openimage):
                 filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
                 new_file_name = os.path.join(directory, filename)
                 cv2.imwrite(new_file_name, savedframe)
-                get_popup_auto("Image Saved")
+                #get_popup_auto("Image Saved")
             if openimage:
                 #analyzed_img = get_image64(r"Analyzed Files/AnalyzedObject_20231111143730679400.png")
                 analyzed_img = r"Saved Images/"+ filename
@@ -489,7 +496,7 @@ def save_image(client_socket, directory, imageSaving, openimage):
                     "deviceID": id,
                     "deviceName": deviceName,
                     "result": 0,
-                    "resultDescription": kesimpulan,
+                    "resultDescription": finalresults,
                     "imageRaw": dataImage
                 }
             }
@@ -552,7 +559,7 @@ while True:
                 try:
                     # connect to the server
                     get_popup_auto("Connecting device...")
-                    client_socket.connect((host,port))
+                    client_socket.connect((host,port))              
                     get_popup("Connection is sucessful")
                     response_thread = threading.Thread(
                     target=receive_response, args=(client_socket, directory, isSaving))
@@ -560,7 +567,7 @@ while True:
                     response_thread.start()
                 except:
                     # Terjadi kesalahan, keluar dari loop
-                     get_popup("Error 53 : Device can not connect to server!")
+                     get_popup("Error 53 : Device can not connect to server! \n check the connection setting!")
                      window['-isTCPActive-'].update(False)
             else:
                 client_socket.close()
