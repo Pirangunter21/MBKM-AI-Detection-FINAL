@@ -1,4 +1,5 @@
 ## MCC-vision-System
+<pre>
 Install Numpy, Pillow, CV, PySimpleGUI
 
 Python yang dipake VIRTUAL ENVIRONMENT 3.11
@@ -9,7 +10,8 @@ sudo apt install python3.11-venv
 source myenv/bin/activate
 AKTIFIN Virtual Environment
 
-https://linuxize.com/post/how-to-install-pip-on-ubuntu-18.04/
-https://linuxize.com/post/how-to-install-pip-on-ubuntu-18.04/
-https://developer.nvidia.com/embedded/learn/get-started-jetson-agx-orin-devkit
-sudo gedit /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+  https://linuxize.com/post/how-to-install-pip-on-ubuntu-18.04/
+  https://linuxize.com/post/how-to-install-pip-on-ubuntu-18.04/
+  https://developer.nvidia.com/embedded/learn/get-started-jetson-agx-orin-devkit
+  sudo gedit /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+</pre>
