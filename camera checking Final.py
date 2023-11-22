@@ -480,6 +480,7 @@ def save_image(client_socket, directory, imageSaving, openimage):
     if openimage:
         analyzed_img = r"Saved Images/"+ filename
         cek_botol(analyzed_img)
+        #cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112848956624.jpg")
     imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
     dataImage = base64.b64encode(imgbytesSend).decode('ascii')
     dataResponse = {
