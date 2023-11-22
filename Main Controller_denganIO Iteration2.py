@@ -106,12 +106,12 @@ def createComponet(deviceID,devicePosition,Image):
 
 #contTop = [frontItem, leftItem, rightItem]
 deviceList = ('1', '2', '3')
-deviceLocation = ('T O P  C H E C K I N G', 'L E F T C H E C K I N G', 'B A CK  C H E C K I N G')
+deviceLocation = ('C A M 01', 'C A M 02', 'C A M 03')
 ImageCamera = ('Image01','Image02','Image03')
 contTop = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList,deviceLocation,ImageCamera)]
 
 deviceList1 = ('4', '5', 'config')
-deviceLocation1 = ('B O T T O M  C H E C K I NG', 'R I G H T  C H E C K I N G', '')
+deviceLocation1 = ('C A M 04', 'C A M 05', '')
 CamEnable1 = ('Cam04', 'Cam05', '')
 ImageCamera1 = ('Image04','Image05', '')
 contButtom = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList1,deviceLocation1,ImageCamera1)]
