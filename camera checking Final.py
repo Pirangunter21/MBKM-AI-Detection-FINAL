@@ -233,7 +233,7 @@ window = sg.Window('DVI - Decal Visual Inspection',
                    grab_anywhere=True,
                     background_color='#2a2a2a',
                     element_justification='c',
-                   icon=icon, location=(0, 0))
+                   icon=icon, location=(0, 0), right_click_menu=sg.MENU_RIGHT_CLICK_EXIT)
 
 ################################################
 
