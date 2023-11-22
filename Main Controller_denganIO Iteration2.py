@@ -149,9 +149,10 @@ ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
 host = '192.168.1.102'
 port = 5000
-server_address = (host, 5000)
+RobotIP = '192.168.1.107'
+server_address = (host, port)
 ServerSocket.bind(server_address)
-
+#ServerSocket.connect((RobotIP, port))
 # Listen for incoming connections
 ServerSocket.listen()
 
@@ -266,11 +267,11 @@ def analyzeIO(results):
   global IOPass
   global IOFail
   if results == "Botol Rejected":
-    GPIO.output(pinFail, GPIO.HIGH)
+    GPIO.output(pinFail, GPIO.LOW)
     IOFail = True
-    print(results)
+    print("fafwafa " + results)
   if results == "Botol Good":
-    GPIO.output(pinPass, GPIO.HIGH)
+    GPIO.output(pinPass, GPIO.LOW)
     IOPass = True
     print(results)
 
@@ -290,33 +291,32 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       prevCaptureRequest += 1 
       if prevCaptureRequest > 10:
         prevCaptureRequest = 0
-      GPIO.output(pinConfirm, GPIO.HIGH)
+      GPIO.output(pinConfirm, GPIO.LOW)
       if pinConfirm:
         Var_outConfirm +=1
       if IOFail:
         Var_outFail +=1
-        GPIO.output(pinFail, GPIO.HIGH)
+#        GPIO.output(pinFail, GPIO.LOW)
       if IOPass:
         Var_outPass +=1
-        GPIO.output(pinPass, GPIO.HIGH)
-      print(IOFail)
-      print(Var_outConfirm)
-      print(Var_outFail)
-      print(Var_outPass)
-      print(IOPass)
+#        GPIO.output(pinPass, GPIO.LOW)
       window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
       time.sleep(0.1)
     else:
-      GPIO.output(pinConfirm, GPIO.LOW)
-      GPIO.output(pinPass, GPIO.LOW)
-      GPIO.output(pinFail, GPIO.LOW)
+#      GPIO.output(pinConfirm, GPIO.LOW)
+#      GPIO.output(pinPass, GPIO.HIGH)
+#      GPIO.output(pinFail, GPIO.LOW)
       window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
 
     prevDataInp = actINRobot
+  if actINRobot == 0:
+    GPIO.output(pinConfirm, GPIO.HIGH)
+    GPIO.output(pinPass, GPIO.HIGH)
+    GPIO.output(pinFail, GPIO.HIGH)
   return [prevDataInp, prevCaptureRequest]
 
 while True:
