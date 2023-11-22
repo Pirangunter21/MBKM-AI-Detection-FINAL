@@ -131,11 +131,17 @@ sg.Column(
         [sg.T('D I S P L A Y  I M A G E',
               font=('Helvetica', 15, "bold"),
               text_color='#000000',background_color=BORDER_COLOR)],
-        [sg.CB('Enable Camera',
-               font=('Helvetica', 12),
-               enable_events=True,
-               k='-isRealtime-',
-               background_color=BORDER_COLOR)],
+#        [sg.CB('Enable Camera',
+#               font=('Helvetica', 12),
+#               enable_events=True,
+#               k='-isRealtime-',
+#               background_color=BORDER_COLOR)],
+        [sg.CB('Enable Saving',
+                  font=('Helvetica', 12),
+                  enable_events=True,
+                  k='-isSaveImage-',
+                  background_color=BORDER_COLOR,
+                  default=sg.user_settings_get_entry('-isSaveImage-', ''))],
         [sg.T('Save Directory:',
               font=('Helvetica', 12),
               background_color=BORDER_COLOR)],
@@ -143,14 +149,7 @@ sg.Column(
                   key='-locImage-',
                   enable_events=True,
                   disabled=True,
-                  use_readonly_for_disable=False,), sg.FolderBrowse()],
-#        [ sg.Button('Save Image', button_color=('#000000', '#d8ff34'),size=(13, 1))],
-        [sg.CB('enable saving',
-                  font=('Helvetica', 12),
-                  enable_events=True,
-                  k='-isSaveImage-',
-                  background_color=BORDER_COLOR,
-                  default=sg.user_settings_get_entry('-isSaveImage-', ''))]
+                  use_readonly_for_disable=False,), sg.FolderBrowse()]
     ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR,
 ),
 ###############################################
@@ -159,8 +158,8 @@ sg.Column(
     [
         [sg.T('T C P / I P   C O N F I G', font=('Helvetica',
               15, "bold"),text_color='#000000', background_color=BORDER_COLOR)],
-        [sg.CB('enable TCP', font=('Helvetica', 12), enable_events=True, k='-isTCPActive-',
-               background_color=BORDER_COLOR, default=sg.user_settings_get_entry('-isTCPActive-', ''))],
+        [sg.CB('Enable TCP', font=('Helvetica', 12), enable_events=True, k='-isTCPActive-',
+               background_color=BORDER_COLOR)],
         [sg.T('TCP Server IP : Port', font=('Helvetica', 12),
               background_color=BORDER_COLOR)],
         [sg.Input(sg.user_settings_get_entry('-IPSetting-', ''), key='-IPSetting-', size=(15, 1)),
@@ -187,25 +186,25 @@ sg.Column(
               key='-decisionlabel-',
                 text_color='#000000',
               justification='left')],
-        [sg.Button('ANALYZE', button_color=('#000000', '#d8ff34'),size=(13, 1))],
+        [sg.Button('MANUAL ANALYZE', button_color=('#000000', '#d8ff34'),size=(15, 1))],
         [sg.T('Detected Object: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-model3-', ''), disabled = True,pad=(70,0),
+         sg.Input(sg.user_settings_get_entry('-model3-', ''), disabled = True,pad=(100,0),
                   key='-model3-', size=(10, 1)),
         ],
         [sg.T('Cat Pudar: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_1-', ''), disabled = True,pad=(70,0),
+         sg.Input(sg.user_settings_get_entry('-result_1-', ''), disabled = True,pad=(142,0),
                   key='-result_1-', size=(10, 1)),
         ],
         [sg.T('Print Kurang: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_2-', ''), disabled = True,pad=(70,0),
+         sg.Input(sg.user_settings_get_entry('-result_2-', ''), disabled = True,pad=(126,0),
                   key='-result_2-', size=(10, 1)),
         ],
         [sg.T('Over Printing: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_3-', ''), disabled = True,pad=(70,0),
+         sg.Input(sg.user_settings_get_entry('-result_3-', ''), disabled = True,pad=(122,0),
                   key='-result_3-', size=(10, 1)),
         ],
         [sg.T('Time (S): ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('waktu', ''), disabled = True,pad=(70,0),
+         sg.Input(sg.user_settings_get_entry('waktu', ''), disabled = True,pad=(155,0),
                   key='waktu', size=(10, 1)),
         sg.T('Seconds ', font=('Helvetica', 12), background_color=BORDER_COLOR),
         ],
@@ -377,9 +376,10 @@ def model_3(image_asli):
 
     return num_objects
 
-finalresults = "Botol Rejected"
+finalresults = "default"
 
 def cek_botol(image_path):
+    global finalresults
     start_time = time.time()
     result_image = process_image(image_path)
     result_1 = model_1(result_image)
@@ -395,6 +395,7 @@ def cek_botol(image_path):
         kesimpulan = "Botol Rejected"
         finalresults = kesimpulan
         window['kesimpulan'].update(button_color='#ff0000')
+
     else:
         kesimpulan = "Botol Good"
         finalresults = kesimpulan
@@ -408,7 +409,6 @@ def cek_botol(image_path):
     window['-result_3-'].update(result_3)
     window['kesimpulan'].update(kesimpulan)
     window['waktu'].update(waktu)
-    return finalresults
 
 
 image_path = r"Code Philip MF/Sebagian Dataset yang Digunakan/reject/REJECT_AVENT20230728113951796247.jpg"
@@ -468,21 +468,21 @@ def receive_response(client_socket, directory, imageSaving):
 def save_image(client_socket, directory, imageSaving, openimage):
     global finalresults
     global deviceName
-    if values['-isRealtime-'] == True:
-            ret, frame = cap.read()
-            frameShow = cv2.resize(frame, image_SIZE)
-            if imageSaving:
-                savedframe = cv2.resize(frame, img_size)
-                now = datetime.now()
-                filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
-                new_file_name = os.path.join(directory, filename)
-                cv2.imwrite(new_file_name, savedframe)
-            if openimage:
-                analyzed_img = r"Saved Images/"+ filename
-                cek_botol(analyzed_img)
-            imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
-            dataImage = base64.b64encode(imgbytesSend).decode('ascii')
-            dataResponse = {
+#    if values['-isRealtime-'] == True:
+    ret, frame = cap.read()
+    frameShow = cv2.resize(frame, image_SIZE)
+    if imageSaving:
+        savedframe = cv2.resize(frame, img_size)
+        now = datetime.now()
+        filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
+        new_file_name = os.path.join(directory, filename)
+        cv2.imwrite(new_file_name, savedframe)
+    if openimage:
+        analyzed_img = r"Saved Images/"+ filename
+        cek_botol(analyzed_img)
+    imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
+    dataImage = base64.b64encode(imgbytesSend).decode('ascii')
+    dataResponse = {
                 "response": "complete",
                 "data": {
                     "deviceID": id,
@@ -491,9 +491,9 @@ def save_image(client_socket, directory, imageSaving, openimage):
                     "resultDescription": finalresults,
                     "imageRaw": dataImage
                 }
-            }
-            TCPdataResponse = json.dumps(dataResponse)
-            client_socket.sendall(TCPdataResponse.encode())
+    }
+    TCPdataResponse = json.dumps(dataResponse)
+    client_socket.sendall(TCPdataResponse.encode())
 
 deviceName = sg.user_settings_get_entry('-deviceName-', '')
 def capture_image():
@@ -509,7 +509,7 @@ def DeactivateCamera():
     window['image'].update(data=imageSample)
 
 ##################### NETWORK RELATED ##################
-camera_realtime = 0
+camera_realtime = 1
 
 isSaving = sg.user_settings_get_entry('-IPSetting-', '')
 directory = sg.user_settings_get_entry('-locImage-', '')
@@ -532,7 +532,7 @@ while True:
         sg.user_settings_set_entry('-isSaveImage-', values['-isSaveImage-'])
         isSaving = values['-isSaveImage-']
 
-    if event == 'ANALYZE':
+    if event == 'MANUAL ANALYZE':
         save_image(client_socket, directory, True,True)
         #cek_botol(r"Code Philip MF/file_image/test.jpg")
     elif event == 'updateIpTcpServer':
@@ -574,14 +574,12 @@ while True:
         deviceName = values['-deviceName-']
         id = deviceName
 
-    elif event == '-isRealtime-':
-        camera_realtime = values['-isRealtime-']
-        if values['-isRealtime-'] == True:
-            get_popup_auto("WARNING: Camera is ON")
-        else:
-            DeactivateCamera()
-    elif event == 'Save Image':
-       save_image(client_socket, directory, True)
+#    elif event == '-isRealtime-':
+#        camera_realtime = values['-isRealtime-']
+#        if values['-isRealtime-'] == True:
+#            get_popup_auto("WARNING: Camera is ON")
+#        else:
+#            DeactivateCamera()
 
 if TCPEnable:
     client_socket.close()
