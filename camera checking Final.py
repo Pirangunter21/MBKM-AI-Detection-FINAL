@@ -439,9 +439,7 @@ client_socket = socket.socket()  # instantiate
 def receive_response(client_socket, directory, imageSaving):
     global TCPEnable
     startup = 0
-    checkData = 0
-    captureRequest = 0
-    InputOutput = client_socket.recv(1024).decode()
+
     while True:
       if startup < 5:
         save_image(client_socket, directory, False, False)
@@ -457,12 +455,10 @@ def receive_response(client_socket, directory, imageSaving):
             if response:
                 print('Menerima respons: {}'.format(response.decode()))
                 dataJson = json.loads(response.decode())
-#                if checkData != captureRequest:
-#                    save_image(client_socket, directory, True, True)
                 if "request" in dataJson:
                     checking_request = dataJson["request"]
                     if checking_request == "checking":
-                        save_image(client_socket, directory, True, True)
+                        save_image(client_socket, directory, imageSaving, True)
           except:    
             break
         else:   
@@ -481,12 +477,8 @@ def save_image(client_socket, directory, imageSaving, openimage):
                 filename = deviceName + now.strftime("ObjectChecked_%Y%m%d%H%M%S%f") + ".png"
                 new_file_name = os.path.join(directory, filename)
                 cv2.imwrite(new_file_name, savedframe)
-                #get_popup_auto("Image Saved")
             if openimage:
-                #analyzed_img = get_image64(r"Analyzed Files/AnalyzedObject_20231111143730679400.png")
                 analyzed_img = r"Saved Images/"+ filename
-                #cek_botol(r"Code Philip MF/Sebagian Dataset yang Digunakan/good/GOOD_AVENT20230728112550235490.jpg")
-                #cek_botol(r"Saved Images/test.png")
                 cek_botol(analyzed_img)
             imgbytesSend = cv2.imencode('.png', cv2.resize(frameShow, (800,600)))[1].tobytes()
             dataImage = base64.b64encode(imgbytesSend).decode('ascii')
