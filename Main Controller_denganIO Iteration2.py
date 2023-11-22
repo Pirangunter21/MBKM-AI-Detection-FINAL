@@ -121,13 +121,13 @@ layout = [contTop, contButtom]
 window = sg.Window('Quality Checker Monitor',
                 layout, finalize=True,
                 resizable=True,
-                no_titlebar=False, #SHOW TITLE BAR
+                no_titlebar=False,
                 margins=(0, 0),
                 grab_anywhere=True,
                 icon=icon,
                 background_color='#282828',
                 element_justification='c',
-                location=(0, 0), right_click_menu=sg.MENU_RIGHT_CLICK_EDITME_VER_EXIT)
+                location=(0, 0), right_click_menu=sg.MENU_RIGHT_CLICK_EXIT)
 window.maximize()
 
 def GetCamera(ScreenName,CameraPlacement):
@@ -190,18 +190,9 @@ def on_new_client(client_socket, addr):
         #Check final results
         if results == "Botol Good":
            analyzeIO(results)
-#          hasil = results
-#          IOPass = True
-#          time.sleep(0.1)
-#          print("kalo " + hasil)
-#          print(IOPass)
         if results == "Botol Rejected":
            analyzeIO(results)
-#            hasil = results
-#            IOFail = True
-#            time.sleep(0.1)
-#            print("kalo " + hasil)
-#            print(IOFail)
+           
         #change image size
         base64Data = base64.b64encode(imgbytes)
         decoded_data = base64.b64decode(base64Data)
