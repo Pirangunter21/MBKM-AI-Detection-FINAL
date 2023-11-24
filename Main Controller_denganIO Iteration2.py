@@ -149,18 +149,16 @@ ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
 host = '192.168.1.102'
 port = 5000
-RobotIP = '192.168.1.107'
-server_address = (host, port)
+server_address = (host, 5000)
 ServerSocket.bind(server_address)
-#ServerSocket.connect((RobotIP, port))
+
 # Listen for incoming connections
 ServerSocket.listen()
 
 captureRequest = 0
 
 
-IOPass = False
-IOFail = False
+
 hasil = "test"
 
 def on_new_client(client_socket, addr):
@@ -259,6 +257,7 @@ dataRobotInput = 0
 IOPass = False
 IOFail = False
 
+
 Var_outConfirm = 0
 Var_outFail = 0
 Var_outPass = 0 
@@ -266,14 +265,23 @@ Var_outPass = 0
 def analyzeIO(results):
   global IOPass
   global IOFail
+
+  global Var_outFail
+  global Var_outPass
+
   if results == "Botol Rejected":
+    Var_outFail +=1
     GPIO.output(pinFail, GPIO.LOW)
-    IOFail = True
-    print("fafwafa " + results)
+    
+    #IOFail = True
+
   if results == "Botol Good":
+    Var_outPass +=1
     GPIO.output(pinPass, GPIO.LOW)
-    IOPass = True
-    print(results)
+    #IOPass = True
+    
+
+
 
 
 def checkDataIO(prevDataInp, prevCaptureRequest):
@@ -294,29 +302,26 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       GPIO.output(pinConfirm, GPIO.LOW)
       if pinConfirm:
         Var_outConfirm +=1
-      if IOFail:
-        Var_outFail +=1
+#      if IOFail is True:
+#        Var_outFail +=1
 #        GPIO.output(pinFail, GPIO.LOW)
-      if IOPass:
-        Var_outPass +=1
+ #     if IOPass is True:
+#        Var_outPass +=1
 #        GPIO.output(pinPass, GPIO.LOW)
       window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
       time.sleep(0.1)
     else:
-#      GPIO.output(pinConfirm, GPIO.LOW)
-#      GPIO.output(pinPass, GPIO.HIGH)
-#      GPIO.output(pinFail, GPIO.LOW)
+      GPIO.output(pinConfirm, GPIO.HIGH)
+      GPIO.output(pinPass, GPIO.HIGH)
+      GPIO.output(pinFail, GPIO.HIGH)
       window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
 
     prevDataInp = actINRobot
-  if actINRobot == 0:
-    GPIO.output(pinConfirm, GPIO.HIGH)
-    GPIO.output(pinPass, GPIO.HIGH)
-    GPIO.output(pinFail, GPIO.HIGH)
+
   return [prevDataInp, prevCaptureRequest]
 
 while True:
