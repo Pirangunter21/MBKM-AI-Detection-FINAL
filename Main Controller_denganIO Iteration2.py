@@ -79,9 +79,9 @@ def createSetting():
             sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
             sg.Text('0' , font='Any 22', key='outFail', background_color=DARK_HEADER_COLOR)
           ],
-          [ sg.Text('Column2', background_color='green', size=(10,2)),
-            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
-          ],
+#          [ sg.Text('Column2', background_color='green', size=(10,2)),
+#            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
+#          ],
           ],
           size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((10, 0), (10, 0)))
    return compItem
@@ -108,6 +108,7 @@ def createComponet(deviceID,devicePosition,Image):
 deviceList = ('1', '2', '3')
 deviceLocation = ('C A M 01', 'C A M 02', 'C A M 03')
 ImageCamera = ('Image01','Image02','Image03')
+header = [sg.Text('', font='Any 22', key='timetext', background_color=DARK_HEADER_COLOR, size=(61, 1))]
 contTop = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList,deviceLocation,ImageCamera)]
 
 deviceList1 = ('4', '5', 'config')
@@ -116,7 +117,7 @@ CamEnable1 = ('Cam04', 'Cam05', '')
 ImageCamera1 = ('Image04','Image05', '')
 contButtom = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList1,deviceLocation1,ImageCamera1)]
 
-layout = [contTop, contButtom]
+layout = [header, contTop, contButtom]
 
 window = sg.Window('Quality Checker Monitor',
                 layout, finalize=True,
@@ -325,6 +326,7 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
   return [prevDataInp, prevCaptureRequest]
 
 while True:
+  window['timetext'].update(time.strftime('%H:%M:%S'))
   event, values = window.read(timeout=50)
   dataRobotInput , captureRequest = checkDataIO(dataRobotInput, captureRequest)
   window['capture'].update(captureRequest)
