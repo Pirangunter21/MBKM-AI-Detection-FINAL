@@ -213,6 +213,7 @@ sg.Column(
         ]
     ], background_color=BORDER_COLOR
 ),
+sg.Text('', font='Any 22', key='timetext', background_color=BORDER_COLOR, size=(61, 1)),
 ]
 ]
 
@@ -519,6 +520,7 @@ id = 1
 ########################################################
 
 while True:
+    window['timetext'].update(time.strftime('%H:%M:%S'))
     event, values = window.read(timeout=20)
     if event == 'EXIT' or event == sg.WIN_CLOSED:
         break  # exit button clicked
