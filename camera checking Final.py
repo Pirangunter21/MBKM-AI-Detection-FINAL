@@ -553,9 +553,8 @@ while True:
                 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # instantiate
                 try:
                     # connect to the server
-                    get_popup_auto("Connecting device...")
                     client_socket.connect((host,port))              
-                    get_popup("Connection is sucessful")
+                    get_popup_auto("Connection is sucessful")
                     response_thread = threading.Thread(
                     target=receive_response, args=(client_socket, directory, isSaving))
                     response_thread.daemon = True
