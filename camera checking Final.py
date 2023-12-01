@@ -124,6 +124,14 @@ top_layout = [[sg.Column(image_display, vertical_alignment='center'), sg.Column(
 #              background_color=BORDER_COLOR)
 #              ]
 
+header_layout = [[
+    sg.Column(
+        [
+            [sg.Text('', font='Any 22', key='timetext', background_color=BORDER_COLOR, size=(61, 1)),]
+        ], pad=((0, 0), (0, 0)), background_color=BORDER_COLOR,
+    )
+]]
+
 content_layout = [[
 ############# Save image options ###############
 sg.Column(
@@ -213,15 +221,14 @@ sg.Column(
         ]
     ], background_color=BORDER_COLOR
 ),
-sg.Text('', font='Any 22', key='timetext', background_color=BORDER_COLOR, size=(61, 1)),
 ]
 ]
 
 ###############################################
 
 bottom_layout = [sg.Column(content_layout,background_color=BORDER_COLOR,size=(infos.current_w,500))]
-
-layout = [[top_layout, bottom_layout]]
+clock_layout = [sg.Column(header_layout, background_color=BORDER_COLOR,size=(infos.current_w,50))]
+layout = [[clock_layout, top_layout, bottom_layout]]
 
 
 
