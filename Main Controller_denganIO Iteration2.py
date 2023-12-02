@@ -329,7 +329,7 @@ while True:
   window['timetext'].update(time.strftime('%H:%M:%S'))
   event, values = window.read(timeout=50)
   dataRobotInput , captureRequest = checkDataIO(dataRobotInput, captureRequest)
-  window['capture'].update(captureRequest)
+#  window['capture'].update(captureRequest)
 
   if event in (sg.WINDOW_CLOSED, 'Exit'):
     break
