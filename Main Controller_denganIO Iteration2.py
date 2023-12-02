@@ -148,7 +148,7 @@ def GetCamera(ScreenName,CameraPlacement):
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
-host = '192.168.1.102'
+host = '192.168.1.1'
 port = 5000
 server_address = (host, 5000)
 ServerSocket.bind(server_address)
