@@ -148,7 +148,7 @@ def GetCamera(ScreenName,CameraPlacement):
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
-host = '192.168.1.111'
+host = '192.168.1.104'
 port = 5000
 server_address = (host, 5000)
 ServerSocket.bind(server_address)
@@ -317,11 +317,15 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       if "Botol Rejected" in hasil:
         print("hasil jelek")
         GPIO.output(pinFail, GPIO.LOW)
+        time.sleep(10)
         Var_outFail +=1
+        GPIO.output(pinFail, GPIO.HIGH)
       if "Botol Pass" in hasil:
         print("hasil bagus")
         GPIO.output(pinPass, GPIO.LOW)
         Var_outPass +=1
+        time.sleep(10)
+        GPIO.output(pinFail, GPIO.HIGH)
 #      if IOFail is True:
 #        Var_outFail +=1
 #        GPIO.output(pinFail, GPIO.LOW)
@@ -334,8 +338,6 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       time.sleep(0.1)
     else:
       GPIO.output(pinConfirm, GPIO.HIGH)
-      GPIO.output(pinPass, GPIO.HIGH)
-      GPIO.output(pinFail, GPIO.HIGH)
       window['outConfirm'].update(Var_outConfirm)
       window['outPass'].update(Var_outPass)
       window['outFail'].update(Var_outFail)
