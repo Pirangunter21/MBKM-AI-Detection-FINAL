@@ -148,7 +148,7 @@ def GetCamera(ScreenName,CameraPlacement):
 
 ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
-host = '192.168.1.1'
+host = '192.168.1.111'
 port = 5000
 server_address = (host, 5000)
 ServerSocket.bind(server_address)
@@ -160,7 +160,6 @@ captureRequest = 0
 
 
 
-hasil = "test"
 
 def on_new_client(client_socket, addr):
 
@@ -251,7 +250,9 @@ pinPass = 37
 pinFail = 40
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(pinInpRobot, GPIO.IN)
-GPIO.setup([pinConfirm, pinPass, pinFail], GPIO.OUT)
+GPIO.setup([pinConfirm, pinPass, pinFail], GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setwarnings(False)
+
 
 dataRobotInput = 0
 
@@ -263,6 +264,9 @@ Var_outConfirm = 0
 Var_outFail = 0
 Var_outPass = 0 
 
+hasil = "test"
+
+
 def analyzeIO(results):
   global IOPass
   global IOFail
@@ -270,15 +274,20 @@ def analyzeIO(results):
   global Var_outFail
   global Var_outPass
 
+  global hasil
+
   if results == "Botol Rejected":
-    Var_outFail +=1
-    GPIO.output(pinFail, GPIO.LOW)
+    hasil = results
+
+    #Var_outFail +=1
+    #GPIO.output(pinFail, GPIO.LOW)
     
     #IOFail = True
 
   if results == "Botol Good":
-    Var_outPass +=1
-    GPIO.output(pinPass, GPIO.LOW)
+    hasil = results
+    #Var_outPass +=1
+    #GPIO.output(pinPass, GPIO.LOW)
     #IOPass = True
     
 
@@ -293,6 +302,8 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
   global IOPass
   global IOFail
 
+  global hasil
+
   actINRobot = GPIO.input(pinInpRobot)
   window['inRobot'].update(str(actINRobot))
   if actINRobot != prevDataInp:
@@ -303,6 +314,14 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       GPIO.output(pinConfirm, GPIO.LOW)
       if pinConfirm:
         Var_outConfirm +=1
+      if "Botol Rejected" in hasil:
+        print("hasil jelek")
+        GPIO.output(pinFail, GPIO.LOW)
+        Var_outFail +=1
+      if "Botol Pass" in hasil:
+        print("hasil bagus")
+        GPIO.output(pinPass, GPIO.LOW)
+        Var_outPass +=1
 #      if IOFail is True:
 #        Var_outFail +=1
 #        GPIO.output(pinFail, GPIO.LOW)
