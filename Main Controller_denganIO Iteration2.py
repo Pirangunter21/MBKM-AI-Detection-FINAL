@@ -82,6 +82,16 @@ def createSetting():
 #          [ sg.Text('Column2', background_color='green', size=(10,2)),
 #            sg.Button('capture', key='capture', button_color=('white', 'firebrick3'))                               
 #          ],
+          [
+            sg.Text('Time', font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('', font='Any 22', key='timetext', background_color=DARK_HEADER_COLOR, size=(61, 1))
+          ],
+          [
+            sg.Text('Elapsed Robot Time:', font=('Any 22'), background_color=DARK_HEADER_COLOR, size=(16,1),),
+            sg.Text(':', font=('Any 22'), background_color=DARK_HEADER_COLOR),
+            sg.Text('', font='Any 22', key='robottime', background_color=DARK_HEADER_COLOR, size=(61, 1))
+          ],
           ],
           size=(itemWidth, itemHeight), background_color=DARK_HEADER_COLOR, pad = ((10, 0), (10, 0)))
    return compItem
@@ -117,7 +127,7 @@ CamEnable1 = ('Cam04', 'Cam05', '')
 ImageCamera1 = ('Image04','Image05', '')
 contButtom = [createComponet(deviceName,deviceLocation,ImageCamera) for deviceName,deviceLocation,ImageCamera in zip(deviceList1,deviceLocation1,ImageCamera1)]
 
-layout = [header, contTop, contButtom]
+layout = [contTop, contButtom]
 
 window = sg.Window('Quality Checker Monitor',
                 layout, finalize=True,
@@ -248,8 +258,9 @@ pinInpRobot = 35
 pinConfirm = 36
 pinPass = 37
 pinFail = 40
+pinTime = 33
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(pinInpRobot, GPIO.IN)
+GPIO.setup([pinInpRobot,pinTime],  GPIO.IN)
 GPIO.setup([pinConfirm, pinPass, pinFail], GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setwarnings(False)
 
@@ -292,6 +303,21 @@ def analyzeIO(results):
     #IOPass = True
     
 
+def time_as_int():
+    return int(round(time.time() * 100))
+
+current_time = 0, 0, False
+start_time = time_as_int()
+
+def Robot_Time(Start):
+  global start_time, current_time
+  current_time = time_as_int() - start_time
+
+  if Start:
+    start_time = start_time + time_as_int() - 0
+  else:
+    start_time = 0 
+    current_time = 0
 
 
 
@@ -305,8 +331,14 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
 
   global hasil
 
+  getTimeRobot = GPIO.input(pinTime)
   actINRobot = GPIO.input(pinInpRobot)
   window['inRobot'].update(str(actINRobot))
+  if getTimeRobot != prevDataInp:
+    Robot_Time(True)
+  else:
+    Robot_Time(False)
+  window['robottime'].update('{:02d}'.format((-current_time // 10000000000) // 280))
   if actINRobot != prevDataInp:
     if  dataRobotInput == 0:
       prevCaptureRequest += 1 
@@ -318,14 +350,12 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       if "Botol Rejected" in hasil:
         print("hasil jelek")
         GPIO.output(pinFail, GPIO.LOW)
-        window['outFail'].update(Var_outFail)
         Var_outFail +=1
         time.sleep(10)
         GPIO.output(pinFail, GPIO.HIGH)
       if "Botol Good" in hasil:
         print("hasil bagus")
         GPIO.output(pinPass, GPIO.LOW)
-        window['outPass'].update(Var_outPass)
         Var_outPass +=1
         time.sleep(10)
         GPIO.output(pinPass, GPIO.HIGH)
@@ -354,7 +384,6 @@ while True:
   event, values = window.read(timeout=50)
   dataRobotInput , captureRequest = checkDataIO(dataRobotInput, captureRequest)
 #  window['capture'].update(captureRequest)
-
   if event in (sg.WINDOW_CLOSED, 'Exit'):
     break
   elif event == 'capture':
@@ -362,6 +391,10 @@ while True:
     if captureRequest > 10:
       captureRequest = 0
     print(captureRequest)
+  #if pinTime:
+  #  Robot_Time(True)
+  #if not pinTime:
+  #  Robot_Time(False)
 
 
 thread.join()   
