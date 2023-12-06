@@ -266,6 +266,7 @@ GPIO.setwarnings(False)
 
 
 dataRobotInput = 0
+TimeRobotInput = 0
 
 IOPass = False
 IOFail = False
@@ -319,6 +320,16 @@ def Robot_Time(Start):
     start_time = 0 
     current_time = 0
 
+def TimerIO(prevTime):
+  getTimeRobot = GPIO.input(pinTime)
+  if getTimeRobot != prevTime:
+    Robot_Time(True)
+  else:
+    Robot_Time(False)
+    prevTime = getTimeRobot
+  window['robottime'].update('{:02d}'.format((-current_time // 10000000000) // 280))
+  return [prevTime]
+
 
 
 def checkDataIO(prevDataInp, prevCaptureRequest):
@@ -331,14 +342,9 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
 
   global hasil
 
-  getTimeRobot = GPIO.input(pinTime)
   actINRobot = GPIO.input(pinInpRobot)
   window['inRobot'].update(str(actINRobot))
-  if getTimeRobot != prevDataInp:
-    Robot_Time(True)
-  else:
-    Robot_Time(False)
-  window['robottime'].update('{:02d}'.format((-current_time // 10000000000) // 280))
+  
   if actINRobot != prevDataInp:
     if  dataRobotInput == 0:
       prevCaptureRequest += 1 
@@ -382,6 +388,7 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
 while True:
   window['timetext'].update(time.strftime('%H:%M:%S'))
   event, values = window.read(timeout=50)
+  TimeRobotInput = TimerIO(TimeRobotInput)
   dataRobotInput , captureRequest = checkDataIO(dataRobotInput, captureRequest)
 #  window['capture'].update(captureRequest)
   if event in (sg.WINDOW_CLOSED, 'Exit'):
@@ -391,10 +398,6 @@ while True:
     if captureRequest > 10:
       captureRequest = 0
     print(captureRequest)
-  #if pinTime:
-  #  Robot_Time(True)
-  #if not pinTime:
-  #  Robot_Time(False)
 
 
 thread.join()   
