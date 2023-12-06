@@ -286,6 +286,7 @@ def analyzeIO(results):
 
   if results == "Botol Good":
     hasil = results
+    print(results)
     #Var_outPass +=1
     #GPIO.output(pinPass, GPIO.LOW)
     #IOPass = True
@@ -317,15 +318,15 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       if "Botol Rejected" in hasil:
         print("hasil jelek")
         GPIO.output(pinFail, GPIO.LOW)
-        time.sleep(10)
         Var_outFail +=1
+        time.sleep(10)
         GPIO.output(pinFail, GPIO.HIGH)
-      if "Botol Pass" in hasil:
+      if "Botol Good" in hasil:
         print("hasil bagus")
         GPIO.output(pinPass, GPIO.LOW)
         Var_outPass +=1
         time.sleep(10)
-        GPIO.output(pinFail, GPIO.HIGH)
+        GPIO.output(pinPass, GPIO.HIGH)
 #      if IOFail is True:
 #        Var_outFail +=1
 #        GPIO.output(pinFail, GPIO.LOW)
