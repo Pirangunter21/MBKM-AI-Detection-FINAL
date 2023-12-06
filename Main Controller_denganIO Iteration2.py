@@ -318,12 +318,14 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
       if "Botol Rejected" in hasil:
         print("hasil jelek")
         GPIO.output(pinFail, GPIO.LOW)
+        window['outFail'].update(Var_outFail)
         Var_outFail +=1
         time.sleep(10)
         GPIO.output(pinFail, GPIO.HIGH)
       if "Botol Good" in hasil:
         print("hasil bagus")
         GPIO.output(pinPass, GPIO.LOW)
+        window['outPass'].update(Var_outPass)
         Var_outPass +=1
         time.sleep(10)
         GPIO.output(pinPass, GPIO.HIGH)
