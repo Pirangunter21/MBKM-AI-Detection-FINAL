@@ -497,7 +497,7 @@ def save_image(client_socket, directory, imageSaving, openimage):
                     "deviceID": id,
                     "deviceName": deviceName,
                     "result": 0,
-                    "resultDescription": finalresults,
+                    "resultDescription": "Botol Good",
                     "imageRaw": dataImage
                 }
     }
