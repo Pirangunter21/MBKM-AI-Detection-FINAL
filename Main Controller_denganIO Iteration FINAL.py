@@ -330,6 +330,8 @@ def TimerIO(prevDataInp, prevCaptureRequest):
   if getTimeRobot != prevDataInp:
     Robot_Time(True)
   else:
+    GPIO.output(pinFail, GPIO.HIGH)
+    GPIO.output(pinPass, GPIO.HIGH)
     Robot_Time(False)
 
     prevDataInp = getTimeRobot
@@ -361,14 +363,12 @@ def checkDataIO(prevDataInp, prevCaptureRequest):
         print("hasil jelek")
         GPIO.output(pinFail, GPIO.LOW)
         Var_outFail +=1
-        time.sleep(6)
-        GPIO.output(pinFail, GPIO.HIGH)
+
       if "Botol Good" in hasil:
         print("hasil bagus")
         GPIO.output(pinPass, GPIO.LOW)
         Var_outPass +=1
-        time.sleep(6)
-        GPIO.output(pinPass, GPIO.HIGH)
+
 #      if IOFail is True:
 #        Var_outFail +=1
 #        GPIO.output(pinFail, GPIO.LOW)
