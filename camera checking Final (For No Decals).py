@@ -73,13 +73,6 @@ image_display = [
               text_color='#000000')],
         [sg.Image(data=img_b64, pad=(0, 0), key='image', size=Display_image_SIZE)] 
     ]
-Image_Processed = [
-         [sg.T('Image Processed',
-              font=('Helvetica', 15, "bold"),
-              justification='center',
-              text_color='#000000')],
-        [sg.Image(data=img_b64, pad=(0, 0), key='PImage',size=Display_image_SIZE)]
-    ]
 
 
 
@@ -112,7 +105,7 @@ ip_address = socket.gethostbyname(hostname)
 #               ]
                
 ################################################
-top_layout = [[sg.Column(image_display, vertical_alignment='center'), sg.Column(Image_Processed, vertical_alignment='center')]]
+top_layout = [[sg.Column(image_display, vertical_alignment='center')]]
 #content_layout = [
 #        sg.Column(image_display,
 #              size=Display_image_SIZE,
@@ -185,42 +178,6 @@ sg.Column(
 
 #################################################
 ##################    Decision   ################
-'''sg.Column(
-    [
-        [sg.T('Decision',
-              size=(13, 1),
-              font=('Helvetica', 15, "bold"),
-              background_color=BORDER_COLOR,
-              key='-decisionlabel-',
-                text_color='#000000',
-              justification='left')],
-        [sg.Button('MANUAL ANALYZE', button_color=('#000000', '#d8ff34'),size=(15, 1))],
-        [sg.T('Detected Object: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-model3-', ''), disabled = True,pad=(100,0),
-                  key='-model3-', size=(10, 1)),
-        ],
-        [sg.T('Cat Pudar: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_1-', ''), disabled = True,pad=(142,0),
-                  key='-result_1-', size=(10, 1)),
-        ],
-        [sg.T('Print Kurang: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_2-', ''), disabled = True,pad=(126,0),
-                  key='-result_2-', size=(10, 1)),
-        ],
-        [sg.T('Over Printing: ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('-result_3-', ''), disabled = True,pad=(122,0),
-                  key='-result_3-', size=(10, 1)),
-        ],
-        [sg.T('Time (S): ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-         sg.Input(sg.user_settings_get_entry('waktu', ''), disabled = True,pad=(155,0),
-                  key='waktu', size=(10, 1)),
-        sg.T('Seconds ', font=('Helvetica', 12), background_color=BORDER_COLOR),
-        ],
-        [
-            sg.Button('', key='kesimpulan',disabled=False, button_color=('#00aa01'),size=(50, 2)),
-        ]
-    ], background_color=BORDER_COLOR 
-),'''
 ]
 ]
 
@@ -466,7 +423,7 @@ def receive_response(client_socket, directory, imageSaving):
                 if "request" in dataJson:
                     checking_request = dataJson["request"]
                     if checking_request == "checking":
-                        save_image(client_socket, directory, imageSaving, False)
+                        save_image(client_socket, directory, imageSaving, True)
           except:    
             break
         else:   
